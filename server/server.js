@@ -1,4 +1,6 @@
 // server/server.js
+
+
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -9,6 +11,22 @@ const connectDB = require("./config/db");
 
 // Optional: express-async-errors helps with async route errors being caught by the error handler
 require("express-async-errors");
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
+app.use((req,res,next) => {
+  if (req.method === 'OPTIONS') {
+    // echo the Origin if allowed, otherwise use first allowed origin
+    const origin = req.headers.origin && ALLOWED_ORIGINS.includes(req.headers.origin) ? req.headers.origin : ALLOWED_ORIGINS[0];
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Methods','GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers','Content-Type,Authorization,Accept,X-Requested-With');
+    res.setHeader('Access-Control-Allow-Credentials','true');
+    return res.status(204).end();
+  }
+  next();
+});
+
 
 const queryRoutes = require("./routes/queryRoutes");
 const authRoutes = require("./routes/authRoutes");
